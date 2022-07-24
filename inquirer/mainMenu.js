@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
-const Department = require("./objects")
-let department;
-
+const connection = require('./../db/connection')
+// const LogTable = require("./objects");
+// const logTable = new LogTable;
 
 const mainMenu = () => {
     inquirer.prompt([
@@ -19,39 +19,45 @@ const mainMenu = () => {
                 'Update an employee role'
             ]
         }
-    ]).then(answers => {
+    ]).then(async answers => {
         let menuChoice = answers.menu;
         switch (menuChoice) {
         case 'View all departments':
-            department = new Department;
-            department.viewDepartment();
-            mainMenu()
-            break
+            try {
+                let [result] = await connection.query(`SELECT * FROM department`); 
+                console.table("", result)
+            } catch (error) {
+                console.log(error);
+            }
+            break;
         case 'View all roles':
-            console.log('2');
-            mainMenu()
-            break
+            try {
+                let [result] = await connection.query(`
+                SELECT role.id, role.title, department.name AS department, role.salary
+                FROM role
+                LEFT JOIN department ON role.department_id = department.id;`)
+                console.table("", result)
+            } catch (error) {
+                console.log(error);
+            }
+            break;
         case 'View all employees':
             console.log('3');
-            mainMenu()
             break
         case 'Add a department':
             console.log('4');
-            mainMenu()
             break
         case 'Add a role':
-            console.log('5');
-            mainMenu()
+            console.log('5')
             break
         case 'Add an employee':
-            console.log('6');
-            mainMenu()
+            console.log('6')
             break
         case 'Update an employee role':
             console.log('7');
-            mainMenu()
             break
-        }
+        };
+        mainMenu();
     })
 };
 
