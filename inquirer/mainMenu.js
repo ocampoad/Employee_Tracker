@@ -65,6 +65,7 @@ const mainMenu = () => {
                 ]).then(answers => {
                     return answers.departmentName;
                 });
+                console.log(deptName)
                 deptName = deptName.trim();
                 deptName = deptName[0].toUpperCase() + deptName.slice(1).toLowerCase();
                 try {
@@ -77,10 +78,88 @@ const mainMenu = () => {
                 }
                 break
             case 'Add a role':
-                console.log('5')
+                const [arrayOfCurrentDept] = await connection.query(
+                    `SELECT name FROM department`
+                );
+                let someArray = ['N/A']
+                await arrayOfCurrentDept.forEach( element => someArray.push(element.name));
+                [roleName, salary, department] = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'roleName',
+                        message: 'What is the name of the role?'
+                    },
+                    {
+                        type: 'input',
+                        name: 'salary',
+                        message: 'What is the salary of this role?'
+                    },
+                    {
+                        type: 'list',
+                        name: 'department',
+                        message: 'Which department does the role belong to?',
+                        choices: someArray
+                    }
+                ]).then(answers => {
+                    return [answers.roleName, answers.salary, answers.department]
+                });
+                salary = salary.trim();
+                roleName = roleName[0].toUpperCase() + roleName.slice(1).toLowerCase();
+                try {
+                    const deptIdresult = await connection.query(`
+                    SELECT id FROM department WHERE name = '${department}'; 
+                    `);
+                    let deptId = deptIdresult[0][0].id
+                    await connection.query(`
+                    INSERT INTO role (title, salary, department_id)
+                    VALUES ('${roleName}', '${salary}','${deptId}');
+                `)
+                } catch (error) {
+                    console.log(error);
+                }
                 break
             case 'Add an employee':
-                console.log('6')
+                [firstName, lastName, role, manager] = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'firstName',
+                        message: "What is the employee's first name?"
+                    },
+                    {
+                        type: 'input',
+                        name: 'lastName',
+                        message: "What is the employee's last name?"
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: "What is employee's role?",
+                        choices: roleArrays
+                    },
+                    {
+                        type: 'list',
+                        name: 'manager',
+                        message: "Who is the employee's manager?",
+                        choices: managerArrays
+                    }
+                ]).then(answers => {
+                    return [answers.firstName, answers.lastName, answers.role, answers.manager]
+                });
+                salary = salary.trim();
+                roleName = roleName[0].toUpperCase() + roleName.slice(1).toLowerCase();
+                try {
+                    const deptIdresult = await connection.query(`
+                    SELECT id FROM department WHERE name = '${department}'; 
+                    `);
+                    let deptId = deptIdresult[0][0].id
+                    await connection.query(`
+                    INSERT INTO role (title, salary, department_id)
+                    VALUES ('${roleName}', '${salary}','${deptId}');
+                `)
+                } catch (error) {
+                    console.log(error);
+                }
+                break
                 break
             case 'Update an employee role':
                 console.log('7');
@@ -90,15 +169,32 @@ const mainMenu = () => {
     })
 };
 
-const addDepartment = () => {
+const addRole = () => {
     inquirer.prompt([
         {
             type: 'input',
-            name: 'departmentName',
-            message: 'What is the name of the department?'
+            name: 'roleName',
+            message: 'What is the name of the role?'
+        },
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of this role?'
+        },
+        {
+            type: 'list',
+            name: 'department',
+            message: 'Which departmetn does the role belong to?',
+            choices: [
+                'Engineering',
+                'Finance',
+                'Legal',
+                'Sales'
+            ]
         }
+
     ]).then(answers => {
-        return answers.departmentName;
+        return [answers.roleName, answers.salary, answers.department]
     });
 };
 
