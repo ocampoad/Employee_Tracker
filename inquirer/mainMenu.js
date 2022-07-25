@@ -1,7 +1,5 @@
 const inquirer = require("inquirer");
 const connection = require('./../db/connection')
-// const LogTable = require("./objects");
-// const logTable = new LogTable;
 
 const mainMenu = () => {
     inquirer.prompt([
@@ -81,8 +79,8 @@ const mainMenu = () => {
                 const [arrayOfCurrentDept] = await connection.query(
                     `SELECT name FROM department`
                 );
-                let someArray = ['N/A']
-                await arrayOfCurrentDept.forEach( element => someArray.push(element.name));
+                let deptArray = []
+                await arrayOfCurrentDept.forEach(element => deptArray.push(element.name));
                 [roleName, salary, department] = await inquirer.prompt([
                     {
                         type: 'input',
@@ -98,13 +96,11 @@ const mainMenu = () => {
                         type: 'list',
                         name: 'department',
                         message: 'Which department does the role belong to?',
-                        choices: someArray
+                        choices: deptArray
                     }
                 ]).then(answers => {
                     return [answers.roleName, answers.salary, answers.department]
                 });
-                salary = salary.trim();
-                roleName = roleName[0].toUpperCase() + roleName.slice(1).toLowerCase();
                 try {
                     const deptIdresult = await connection.query(`
                     SELECT id FROM department WHERE name = '${department}'; 
@@ -119,6 +115,16 @@ const mainMenu = () => {
                 }
                 break
             case 'Add an employee':
+                const [arrayOfCurrentRoles] = await connection.query(
+                    `SELECT title FROM role`
+                );
+                const [arrayOfCurrentManagers] = await connection.query(
+                    `SELECT first_name, last_name FROM employee WHERE manager_id IS NULL`
+                );
+                let rolesArray = [];
+                await arrayOfCurrentRoles.forEach(element => rolesArray.push(element.title));
+                let managerArray = ['N/A']
+                await arrayOfCurrentManagers.forEach(element => managerArray.push(element.first_name + ' ' + element.last_name));
                 [firstName, lastName, role, manager] = await inquirer.prompt([
                     {
                         type: 'input',
@@ -134,32 +140,39 @@ const mainMenu = () => {
                         type: 'list',
                         name: 'role',
                         message: "What is employee's role?",
-                        choices: roleArrays
+                        choices: rolesArray
                     },
                     {
                         type: 'list',
                         name: 'manager',
                         message: "Who is the employee's manager?",
-                        choices: managerArrays
+                        choices: managerArray
                     }
                 ]).then(answers => {
                     return [answers.firstName, answers.lastName, answers.role, answers.manager]
                 });
-                salary = salary.trim();
-                roleName = roleName[0].toUpperCase() + roleName.slice(1).toLowerCase();
                 try {
-                    const deptIdresult = await connection.query(`
-                    SELECT id FROM department WHERE name = '${department}'; 
+                    const roleIdresult = await connection.query(`
+                    SELECT id FROM role WHERE title = '${role}'; 
                     `);
-                    let deptId = deptIdresult[0][0].id
-                    await connection.query(`
-                    INSERT INTO role (title, salary, department_id)
-                    VALUES ('${roleName}', '${salary}','${deptId}');
-                `)
+                    let roleId = roleIdresult[0][0].id
+                    if (manager === 'N/A') {
+                        await connection.query(`
+                        INSERT INTO employee (first_name, last_name, role_id)
+                        VALUES ('${firstName}', '${lastName}','${roleId}');
+                        `)
+                    } else {
+                        const managerIdresult = await connection.query(`
+                        SELECT id FROM employee WHERE CONCAT(first_name, ' ',last_name) = '${manager}';`);
+                        let managerId = managerIdresult[0][0].id;
+                        await connection.query(`
+                        INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                        VALUES ('${firstName}', '${lastName}','${roleId}', ${managerId});
+                        `)
+                    }
                 } catch (error) {
                     console.log(error);
                 }
-                break
                 break
             case 'Update an employee role':
                 console.log('7');
@@ -168,36 +181,5 @@ const mainMenu = () => {
         await mainMenu();
     })
 };
-
-const addRole = () => {
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'roleName',
-            message: 'What is the name of the role?'
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'What is the salary of this role?'
-        },
-        {
-            type: 'list',
-            name: 'department',
-            message: 'Which departmetn does the role belong to?',
-            choices: [
-                'Engineering',
-                'Finance',
-                'Legal',
-                'Sales'
-            ]
-        }
-
-    ]).then(answers => {
-        return [answers.roleName, answers.salary, answers.department]
-    });
-};
-
-
 
 module.exports = mainMenu;
