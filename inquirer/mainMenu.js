@@ -56,7 +56,25 @@ const mainMenu = () => {
                 }
                 break
             case 'Add a department':
-                console.log('4');
+                deptName = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'departmentName',
+                        message: 'What is the name of the department?'
+                    }
+                ]).then(answers => {
+                    return answers.departmentName;
+                });
+                deptName = deptName.trim();
+                deptName = deptName[0].toUpperCase() + deptName.slice(1).toLowerCase();
+                try {
+                    await connection.query(`
+                    INSERT INTO department (name)
+                    VALUES ('${deptName}');
+                `)
+                } catch (error) {
+                    console.log(error);
+                }
                 break
             case 'Add a role':
                 console.log('5')
@@ -68,8 +86,22 @@ const mainMenu = () => {
                 console.log('7');
                 break
         };
-        mainMenu();
+        await mainMenu();
     })
 };
+
+const addDepartment = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'departmentName',
+            message: 'What is the name of the department?'
+        }
+    ]).then(answers => {
+        return answers.departmentName;
+    });
+};
+
+
 
 module.exports = mainMenu;
