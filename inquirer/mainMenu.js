@@ -175,7 +175,45 @@ const mainMenu = () => {
                 }
                 break
             case 'Update an employee role':
-                console.log('7');
+                const [arrayOfCurrentEmployees] = await connection.query(
+                    `SELECT first_name, last_name FROM employee `
+                );
+                const [arrayOfRoles] = await connection.query(
+                    `SELECT title FROM role `
+                )
+                let employeesArray = [];
+                await arrayOfCurrentEmployees.forEach(element => employeesArray.push(element.first_name + ' ' + element.last_name));
+                let anotherRolesArray = [];
+                await arrayOfRoles.forEach(element => anotherRolesArray.push(element.title));
+                [ employeeName, role ] = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: "employeeName",
+                        message: "Which employee's role do you want to update?",
+                        choices: employeesArray
+                    },
+                    {
+                        type: 'list',
+                        name: "role",
+                        message: "Which role do you want to assignt the selected employee?",
+                        choices: anotherRolesArray
+                    }
+                ]).then( answers => {
+                    return [answers.employeeName, answers.role]
+                });
+                try {
+                    const roleIdresult = await connection.query(`
+                    SELECT id FROM role WHERE title = '${role}'; 
+                    `);
+                    let roleId = roleIdresult[0][0].id
+                    let employeeFirstName = employeeName.trim().split(' ')[0];
+                    console.log(employeeFirstName)
+                    await connection.query(
+                        `UPDATE employee SET role_id = ${roleId} WHERE first_name = '${employeeFirstName}' `
+                    );
+                } catch (error) {
+                    console.log(error);
+                }
                 break
         };
         await mainMenu();
