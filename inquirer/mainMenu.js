@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const connection = require('./../db/connection')
+require('console.table');
 
 const mainMenu = () => {
     inquirer.prompt([
@@ -63,7 +64,6 @@ const mainMenu = () => {
                 ]).then(answers => {
                     return answers.departmentName;
                 });
-                console.log(deptName)
                 deptName = deptName.trim();
                 deptName = deptName[0].toUpperCase() + deptName.slice(1).toLowerCase();
                 try {
@@ -185,7 +185,7 @@ const mainMenu = () => {
                 await arrayOfCurrentEmployees.forEach(element => employeesArray.push(element.first_name + ' ' + element.last_name));
                 let anotherRolesArray = [];
                 await arrayOfRoles.forEach(element => anotherRolesArray.push(element.title));
-                [ employeeName, role ] = await inquirer.prompt([
+                [employeeName, role] = await inquirer.prompt([
                     {
                         type: 'list',
                         name: "employeeName",
@@ -198,7 +198,7 @@ const mainMenu = () => {
                         message: "Which role do you want to assignt the selected employee?",
                         choices: anotherRolesArray
                     }
-                ]).then( answers => {
+                ]).then(answers => {
                     return [answers.employeeName, answers.role]
                 });
                 try {
