@@ -14,7 +14,6 @@
   - [Continued development](#continued-development)
   - [Useful resources](#useful-resources)
 - [Author](#author)
-- [Acknowledgments](#acknowledgments)
 ​
 ## Overview
 ​
@@ -58,8 +57,8 @@ THEN I am prompted to select an employee to update and their new role and this i
 ​
 ### Links
 ​
-- Solution URL: [Add solution URL here](https://your-solution-url.com)
-- Live Site URL: [Add live site URL here](https://your-live-site-url.com)
+- Recording: [Whatch this please!](https://drive.google.com/file/d/1m0GBXc9aoy04ZTmHZRdQ4L47TBPJ5sMQ/view)
+
 ​
 ## My process
 ​
